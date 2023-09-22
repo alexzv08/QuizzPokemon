@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+  <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+  <title>Generar 5 Divs</title>
+  <style>
+    /* Estilos para colores */
+    #divContainer{
+        width: 60%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    .green {
+      background-color: green;
+    }
+
+    .red {
+      background-color: red;
+    }
+    .container{
+      align-items: center;
+      display: flex;
+      justify-content: center;
+      height: 75px;
+      width: 75px;
+      margin: 5% 0;
+      border: 1px solid rgba(75, 75, 75, 0.534);
+      border-radius: 5%;
+    }
+    #quizzContainer{
+      display: grid;
+      margin-bottom: 500px;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  
+  <button id="btnEmpezar">Empezar a jugar</button>
+  <p></p>
+  <h1>POKEDLE</h1>
+  <button id="btnGenerar">COMPROBAR</button>
+  <p></p>
+  <div class="mb-3">
+    <input type="text" class="pokeImput" id="pokeImput" placeholder="Introduce un id Pokemon" list="listaPokes">
+    <datalist id="listaPokes">
+    </datalist>
+  <div id="quizzContainer">
+    <div class="container">Nº POKEDEX</div>
+    <div class="container">PESO</div>
+    <div class="container">ALTURA</div>
+    <div class="container">TIPO 1</div>
+    <div class="container">TIPO 2</div>
+  </div>
+  <script>
+    const listaQuizzPokemon = document.querySelector("#listaPokes");
+    const URL = "https://pokeapi.co/api/v2/pokemon/";
+
+
+    for (let i = 1; i <= 151; i++) {
+    fetch(URL + i)
+        .then((response) => response.json())
+        .then(data => dataFormPoke(data))
+}
+
+    //MOSTRAR LOS POKEMONS EN EL CAMPO DE TEXTO
+    function dataFormPoke(poke) {
+        const formPoke = document.createElement("option");
+        formPoke.id = "pokeList"; // Establecer el atributo 'id' para el datalist
+        formPoke.innerHTML = `
+            <option id="${poke.name}" value="${poke.name}">
+        `;
+        listaQuizzPokemon.append(formPoke);
+    }
+
+
+
+    let randomId = "";
+    let randomPeso = "";
+    let randomAltura = "";
+    let randomTipo1;
+    let randomTipo2;
+
+    document.getElementById("btnEmpezar").addEventListener("click", function() {
+      const min = 1; // Valor mínimo del rango
+      const max = 151; // Valor máximo del rango
+      // Generar número aleatorio entre min y max (ambos inclusive)
+      const numeroAleatorio = Math.floor(Math.random() * (max - min + 1)) + min;
+      
+      fetch(URL + numeroAleatorio)
+        .then((response) => response.json())
+        .then(data => {
+          randomId = data.id;
+          randomAltura = data.height / 10;
+          randomPeso = data.weight / 10;
+          [randomTipo1, randomTipo2] = data.types.map(typeInfo => typeInfo.type.name);
+        });
+    });
+
+
+
+
+
+    function generateColoredDiv(isValid,upDown) {
+        const div = document.createElement("div");
+        div.classList.add("container");
+        div.classList.add(isValid ? "green" : "red");
+
+        let content;
+        if(upDown==true){
+          content ="UP";
+        }else if(upDown==false){
+          content ="DOWN";
+        }else{
+            content ="CHECK";
+        }
+
+        // const content = upDown ? "UP" : "DAWN";
+        div.textContent = content;
+        return div;
+    }
+
+
+
+
+    document.getElementById("btnGenerar").addEventListener("click", function() {
+        
+        const container = document.getElementById("divContainer");
+        var value = document.getElementById('pokeImput').value;
+
+        //generateContainerCheck()
+        //container2.appendChild(container);
+        //Limpiar el contenedor antes de agregar los nuevos divs
+        //container.innerHTML = "";
+        
+        let id = "";
+        let peso = "";
+        let altura = "";
+        let tipo1 = "";
+        let tipo2 = "";
+        
+        fetch(URL + value)
+            .then((response) => response.json())
+            .then(data => {
+
+              const container2 = document.getElementById("quizzContainer")
+              //RELLENAMOS LOS VALORES
+              id=data.id;
+              altura=data.height/10;
+              peso=data.weight/10;
+              const [tipo1,tipo2] = data.types.map(typeInfo => typeInfo.type.name);
+              console.log("{");
+              console.log(id);
+              console.log(altura);
+              console.log(peso);
+              console.log(tipo1);
+              console.log(tipo2);         
+              console.log("----");
+              console.log(randomId);
+              console.log(randomAltura);
+              console.log(randomPeso);
+              console.log(randomTipo1);
+              console.log(randomTipo2);
+              console.log("}");
+              console.log("----");
+              console.log(typeof tipo1, typeof randomTipo1)
+              //HACEMOS LA COMPROBACIONES
+              //ID
+              if(id < randomId){
+                  const div = generateColoredDiv(false,true);
+                  container2.appendChild(div);
+              }else if(id > randomId){
+                  const div = generateColoredDiv(false,false);
+                  container2.appendChild(div);
+              }else{
+                  const div = generateColoredDiv(true,null);
+                  container2.appendChild(div);
+              }
+              //PESO
+              if(peso < randomPeso){
+                  const div = generateColoredDiv(false,true);
+                  container2.appendChild(div);
+              }else if(peso > randomPeso){
+                  const div = generateColoredDiv(false,false);
+                  container2.appendChild(div);
+              }else{
+                  const div = generateColoredDiv(true,null);
+                  container2.appendChild(div);
+              }
+              //ALTURA
+              if(altura < randomAltura){
+                  const div = generateColoredDiv(false,true);
+                  container2.appendChild(div);
+              }else if(altura > randomAltura){
+                  const div = generateColoredDiv(false,false);
+                  container2.appendChild(div);
+              }else{
+                  const div = generateColoredDiv(true,null);
+                  container2.appendChild(div);
+              }
+              //TIPO 1
+              if(tipo1 != randomTipo1){
+                  const div = generateColoredDiv(false,"none");
+                  container2.appendChild(div);
+              }else{
+                  const div = generateColoredDiv(true,null);
+                  container2.appendChild(div);
+              }
+              //TIPO 2
+              if(tipo2 != randomTipo2){
+                  const div = generateColoredDiv(false,"none");
+                  container2.appendChild(div);
+              }else{
+                  const div = generateColoredDiv(true,null);
+                  container2.appendChild(div);
+              }
+        });
+    });
+  </script>
+
+</body>
+
+</html>
